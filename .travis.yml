@@ -1,0 +1,10 @@
+language: cxx
+
+compiler:
+- gcc
+- clang
+
+addons:
+  apt:
+    install:
+    - flex
