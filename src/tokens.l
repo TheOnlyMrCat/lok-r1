@@ -1,5 +1,5 @@
 %{
-#include "tokens.hpp"
+#include "tokens.h"
 %}
 %%
 use return USE;

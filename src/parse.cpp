@@ -15,7 +15,7 @@ token NONE_TOKEN = token(NONE, "");
 
 ParseError::ParseError(std::string what): std::logic_error(what) {}
 
-token currentToken;
+token currentToken = NONE_TOKEN;
 tokenType nextToken()
 {
 	currentToken = token(static_cast<tokenType>(yylex()), yytext);
@@ -27,9 +27,9 @@ node parseType()
 	if (currentToken.getType() != TYPE) throw ParseError("Expected type");
 
 	std::string type = currentToken.getValue();
-	t = token(currentToken.getType(), type.substr(1, type.length() - 1));
+	token t = token(currentToken.getType(), type.substr(1, type.length() - 1));
 
-	return node(0, currentToken);
+	return node(0, t);
 }
 
 node parseUse()
@@ -45,7 +45,9 @@ node parseBody()
 	node n = node(0, NONE_TOKEN);
 
 	tokenType tk;
-	while (tk = nextToken() != BRACE)
+	while ((tk = nextToken()) != BRACE);
+
+	return n;
 }
 
 node parseRun()
@@ -64,7 +66,7 @@ node parseRoot()
 	node root = node(0, NONE_TOKEN);
 
 	tokenType tk;
-	while (tk = nextToken() != END) {
+	while ((tk = nextToken()) != END) {
 		switch (tk) {
 		case USE:
 			root.addChild(parseUse());

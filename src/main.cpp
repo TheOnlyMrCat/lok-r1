@@ -19,6 +19,10 @@ int yywrap() {
 	return 1; //TODO?
 }
 
+namespace clok {
+	bool VERBOSE;
+}
+
 extern FILE *yyin;
 
 int main(int argc, char *argv[]) {
@@ -40,12 +44,12 @@ int main(int argc, char *argv[]) {
 		std::cout << options.help() << std::endl;
 	}
 
-	VERBOSE = result.count("verbose") > 0;
+	clok::VERBOSE = result.count("verbose") > 0;
 
 	std::vector<node> programs = std::vector<node>(argc - 1);
 
 	for (int i = 1; i < argc; i++) {
-		if (VERBOSE) std::cout << "Reading file: " << argv[i] << std::endl;
+		if (clok::VERBOSE) std::cout << "Reading file: " << argv[i] << std::endl;
 		yyin = fopen(argv[i], "r");
 		try {
 			programs.push_back(clok::parse());

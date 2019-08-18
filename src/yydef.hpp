@@ -8,6 +8,8 @@
 
 #pragma once
 
-extern int yylex();
-extern char *yytext;
-extern int yylineno;
+extern "C" {
+    extern int yylex();
+    extern char *yytext;
+    extern int yylineno;
+}

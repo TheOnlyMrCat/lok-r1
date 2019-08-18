@@ -17,7 +17,7 @@ public:
 };
 
 namespace clok {
-	bool VERBOSE;
+	extern bool VERBOSE;
 
 	node parse();
 }

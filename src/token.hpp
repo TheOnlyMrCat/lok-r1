@@ -10,13 +10,13 @@
 
 #include <string>
 
-#include "tokens.hpp"
+#include "tokens.h"
 
 class token {
 public:
 	token(tokenType type, std::string value);
 	~token();
-	
+
 	tokenType getType();
 	std::string getValue();
 private:
