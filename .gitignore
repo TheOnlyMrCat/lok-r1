@@ -18,6 +18,7 @@ install-sh
 Makefile.in
 missing
 ylwrap
+aclocal.m4
 
 # Ignore compiled files
 src/tokens.c

@@ -8,6 +8,8 @@ AC_CONFIG_SRCDIR([src/parse.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile])
 
+m4_include(ax_cxx_compile_stdcxx.m4)
+
 # Checks for programs.
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX(11)

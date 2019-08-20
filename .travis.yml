@@ -2,7 +2,6 @@ language: cpp
 
 before-script:
   - ./.travis/install-automake.sh
-  - wget -O ax_cxx_compile_stdcxx.m4 https://git.savannah.gnu.org/gitweb/?p=autoconf-archive.git;a=blob_plain;f=m4/ax_cxx_compile_stdcxx.m4
 script: ./autogen.sh && ./configure && make && make check && make distcheck
 
 compiler:
