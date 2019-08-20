@@ -12,6 +12,7 @@
 #include "yydef.hpp"
 
 token NONE_TOKEN = token(NONE, "");
+std::unordered_map<std::string, int> operators;
 
 ParseError::ParseError(std::string what): std::logic_error(what) {}
 
@@ -40,12 +41,29 @@ node parseUse()
 	return n;
 }
 
-node parseBody()
+node parseExpression()
 {
+	node n = node(0, currentToken);
+
+	while (nextToken() != SEMICOLON) {
+
+	}
+
+	return n;
+}
+
+node parseBlock()
+{
+	if (currentToken.getType() != OPEN_BRACE) {
+		throw ParseError("Expected '{' at start of block statement");
+	}
+
 	node n = node(0, NONE_TOKEN);
 
 	tokenType tk;
-	while ((tk = nextToken()) != BRACE);
+	while ((tk = nextToken()) != CLOS_BRACE) {
+
+	}
 
 	return n;
 }
@@ -57,8 +75,26 @@ node parseRun()
 		n.addChild(node(0, currentToken));
 		nextToken();
 	}
-	n.addChild(parseBody());
+	n.addChild(parseBlock());
 	return n;
+}
+
+node parseFunction()
+{
+	node n = node(3, currentToken);
+	if (nextToken() == TYPE) {
+		n.addChild(parseType());
+		nextToken();
+	}
+
+	if (currentToken.getType() == OPEN_SQUARE) {
+		nextToken();
+		do {
+			n.addChild(parseExpression());
+		} while (nextToken() != CLOS_SQUARE);
+	}
+
+	nextToken();
 }
 
 node parseRoot()

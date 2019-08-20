@@ -9,6 +9,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <unordered_map>
 
 class node;
 class ParseError : public std::logic_error {
@@ -18,6 +19,7 @@ public:
 
 namespace clok {
 	extern bool VERBOSE;
+	extern std::unordered_map<std::string, int> operators;
 
 	node parse();
 }

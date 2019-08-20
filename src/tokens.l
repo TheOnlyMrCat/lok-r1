@@ -16,12 +16,16 @@ namespace return NAMESPACE;
 
 "<\w*>" return TYPE;
 
-"{|}" return BRACE;
-\(|\) return PARENTHESIS;
-[|] return SQUARE;
+"{" return OPEN_BRACE;
+"}" return CLOS_BRACE;
+\( return OPEN_PARENTHESIS;
+\) return CLOS_PARENTHESIS;
+\[ return OPEN_SQUARE;
+\] return CLOS_SQUARE;
 
 "!" return OPERATOR_UN;
-"<=|>=|::|[+*/%<>=:]" return OPERATOR_BIN;
+"<=|>=|<<|>>|[+*/%<>=:.!~]" return OPERATOR_BIN;
+; return SEMICOLON;
 
 "$" return END;
 \n yylineno++;

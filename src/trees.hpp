@@ -19,10 +19,13 @@ public:
 	node();
 	node(int children, token t);
 	~node();
-	
+
 	void addChild(node node);
 	void setChild(int num, node node);
-	
+
+	node getChild(int num);
+	int childrenCount();
+
 	std::vector<node>::iterator begin();
 	std::vector<node>::iterator end();
 private:

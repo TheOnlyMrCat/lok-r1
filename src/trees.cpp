@@ -22,6 +22,16 @@ void node::setChild(int num, node node)
 	children[num] = node;
 }
 
+node node::getChild(int num)
+{
+	return children[num];
+}
+
+int node::childrenCount()
+{
+	return children.size();
+}
+
 std::vector<node>::iterator node::begin()
 {
 	return children.begin();

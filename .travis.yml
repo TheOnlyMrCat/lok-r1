@@ -1,6 +1,7 @@
 language: cpp
 
-script: ./configure && make
+before-script: ./.travis/install-automake.sh
+script: ./autogen.sh && ./configure && make && make check && make distcheck
 
 compiler:
 - gcc
@@ -8,5 +9,7 @@ compiler:
 
 addons:
   apt:
+    packages:
+    - autoconf
     install:
     - flex

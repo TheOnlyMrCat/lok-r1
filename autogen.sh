@@ -1,4 +1,1 @@
-aclocal && \
-autoconf && \
-automake --add-missing && \
-autoheader
+autoreconf --install --force
