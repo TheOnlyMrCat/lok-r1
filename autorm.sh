@@ -1,1 +1,1 @@
-rm -f clok compile config.h config.h.in config.log config.status configure depcomp install-sh Makefile Makefile.in missing stamp-h1 ylwrap
+rm -f clok compile config.h config.h.in config.log config.status configure depcomp install-sh Makefile Makefile.in missing stamp-h1 ylwrap aclocal.m4

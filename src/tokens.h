@@ -15,6 +15,7 @@ enum tokenType {
 	FUNCTION,
 	USE,
 	RETURN,
+	RUN,
 	IDENTIFIER,
 	TYPE,
 	NAMESPACE,
@@ -30,5 +31,6 @@ enum tokenType {
 	OPEN_SQUARE,
 	CLOS_SQUARE,
 	SEMICOLON,
+	WHITESPACE,
 	PUBLIC
 };

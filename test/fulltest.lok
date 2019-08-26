@@ -13,11 +13,16 @@ run {
 	one <i32>;
 
 	one = 50;
-	two <> = 4093872;
+	two <> = 4093871;
+
+	two++;
+	one--;
+	one**;
+	two//;
 
 	result <i32> = sum [one, two];
 
-	noop;
+	noop [];
 
 	strBytes <byte:> = "Hello, world!";
 	strProper <string> = strBytes; // Implicit constructor call string(<byte:>)

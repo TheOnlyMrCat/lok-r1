@@ -8,27 +8,15 @@
 
 #pragma once
 
-
-#include <string>
 #include <vector>
 
 #include "token.hpp"
 
-class node {
-public:
-	node();
-	node(int children, token t);
-	~node();
+class node;
 
-	void addChild(node node);
-	void setChild(int num, node node);
+typedef std::shared_ptr<node> node_t;
 
-	node getChild(int num);
-	int childrenCount();
-
-	std::vector<node>::iterator begin();
-	std::vector<node>::iterator end();
-private:
-	std::vector<node> children;
-	token t;
+struct node {
+	std::vector<node_t> children;
+	token token;
 };

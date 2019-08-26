@@ -12,16 +12,7 @@
 
 #include "tokens.h"
 
-class token {
-public:
-	token(tokenType type, std::string value);
-	~token();
-
-	tokenType getType();
-	std::string getValue();
-private:
-	tokenType t;
-	std::string v;
+struct token {
+	tokenType type;
+	std::string value;
 };
-
-extern token NONE_TOKEN;

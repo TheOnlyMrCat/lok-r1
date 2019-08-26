@@ -6,106 +6,178 @@
 //  Copyright © 2019 Dockdev. All rights reserved.
 //
 
+#include <iostream>
+
 #include "clok.hpp"
 #include "trees.hpp"
 
 #include "yydef.hpp"
 
-token NONE_TOKEN = token(NONE, "");
-std::unordered_map<std::string, int> operators;
+// A lower number means a higher precedence
+std::unordered_map<std::string, int> binPrecedence = {
+	{":", 0},
+	{".", 1},
+	{"*", 2},
+	{"/", 2},
+	{"%", 2},
+	{"+", 3},
+	{"-", 3},
+	{"<<", 4},
+	{">>", 4},
+	{"<", 5},
+	{">", 5},
+	{"<=", 5},
+	{">=", 5},
+	{"==", 6},
+	{"!=", 6},
+	{"&", 7},
+	{"|", 7},
+	{"^", 7},
+	{"&&", 8},
+	{"||", 8},
+	{"=", 9}
+};
 
 ParseError::ParseError(std::string what): std::logic_error(what) {}
 
-token currentToken = NONE_TOKEN;
+token currentToken = {NONE, "ERROR"};
 tokenType nextToken()
 {
-	currentToken = token(static_cast<tokenType>(yylex()), yytext);
-	return currentToken.getType();
+	tokenType ttp;
+	while ((ttp = static_cast<tokenType>(yylex())) == WHITESPACE);
+	currentToken = {ttp, yytext};
+	return ttp;
 }
 
-node parseType()
+node_t make(token type)
 {
-	if (currentToken.getType() != TYPE) throw ParseError("Expected type");
-
-	std::string type = currentToken.getValue();
-	token t = token(currentToken.getType(), type.substr(1, type.length() - 1));
-
-	return node(0, t);
-}
-
-node parseUse()
-{
-	node n = node(1, currentToken);
-	nextToken();
-	n.addChild(parseType());
+	node_t n = std::make_shared<node>();
+	n->token = type;
 	return n;
 }
 
-node parseExpression()
+node_t make(int i, token type)
 {
-	node n = node(0, currentToken);
+	node_t n = make(type);
+	n->children.reserve(i);
+	return n;
+}
 
-	while (nextToken() != SEMICOLON) {
+node_t parseType()
+{
+	if (currentToken.type != TYPE) throw ParseError("Expected type");
 
+	std::string type = currentToken.value;
+	token t = {currentToken.type, type.substr(1, type.length() - 1)};
+
+	return make(0, t);
+}
+
+node_t parseUse()
+{
+	node_t n = make(1, currentToken);
+	nextToken();
+	n->children.push_back(parseType());
+	return n;
+}
+
+node_t parseExpression()
+{
+	node_t n = make(currentToken);
+	int rootPrec = 0;
+
+	while (nextToken() != SEMICOLON && currentToken.type != CLOS_PARENTHESIS && currentToken.type != CLOS_SQUARE) {
+		int checkingPrec;
+		try {
+			checkingPrec = binPrecedence.at(currentToken.value);
+		} catch (std::out_of_range e) {
+			throw ParseError(std::string("Unexpected token: ") + currentToken.value);
+		}
+		node_t child = n;
+		node_t parent = n;
+
+		while (rootPrec > checkingPrec) {
+			parent = child;
+			child = child->children[child->children.size() - 1];
+		}
+
+		node_t opNode = make(2, currentToken);
+
+		opNode->children.push_back(child);
+		std::replace(parent->children.begin(), parent->children.end(), child, opNode);
+
+		if (nextToken() == OPEN_PARENTHESIS) {
+			nextToken();
+			opNode->children.push_back(parseExpression());
+		} else {
+			opNode->children.push_back(make(0, currentToken));
+		}
+		n = opNode;
 	}
 
 	return n;
 }
 
-node parseBlock()
+node_t parseBlock()
 {
-	if (currentToken.getType() != OPEN_BRACE) {
+	if (currentToken.type != OPEN_BRACE) {
 		throw ParseError("Expected '{' at start of block statement");
 	}
 
-	node n = node(0, NONE_TOKEN);
+	node_t n = make({NONE, "block"});
 
 	tokenType tk;
 	while ((tk = nextToken()) != CLOS_BRACE) {
-
+		//TODO: Keyword checks
+		n->children.push_back(parseExpression());
 	}
 
 	return n;
 }
 
-node parseRun()
+node_t parseRun()
 {
-	node n = node(2, currentToken);
+	node_t n = make(2, currentToken);
 	if (nextToken() == INTEGER) {
-		n.addChild(node(0, currentToken));
+		n->children.push_back(make(0, currentToken));
 		nextToken();
 	}
-	n.addChild(parseBlock());
+	n->children.push_back(parseBlock());
 	return n;
 }
 
-node parseFunction()
+node_t parseFunction()
 {
-	node n = node(3, currentToken);
+	node_t n = make(3, currentToken);
 	if (nextToken() == TYPE) {
-		n.addChild(parseType());
+		n->children.push_back(parseType());
 		nextToken();
 	}
 
-	if (currentToken.getType() == OPEN_SQUARE) {
+	if (currentToken.type == OPEN_SQUARE) {
 		nextToken();
 		do {
-			n.addChild(parseExpression());
-		} while (nextToken() != CLOS_SQUARE);
+			n->children.push_back(parseExpression());
+		} while (currentToken.type != CLOS_SQUARE);
+		nextToken();
 	}
 
-	nextToken();
+	return n;
 }
 
-node parseRoot()
+node_t parseRoot()
 {
-	node root = node(0, NONE_TOKEN);
+	node_t root = make({NONE, "root"});
 
 	tokenType tk;
 	while ((tk = nextToken()) != END) {
 		switch (tk) {
 		case USE:
-			root.addChild(parseUse());
+			root->children.push_back(parseUse());
+			break;
+		case RUN:
+			nextToken();
+			root->children.push_back(parseBlock());
 			break;
 		case UNKNOWN:
 			throw ParseError(std::string("Unknown token: ") + yytext);
@@ -119,5 +191,25 @@ node parseRoot()
 
 node clok::parse()
 {
-	return parseRoot();
+	return *parseRoot();
+}
+
+void printNode(node_t n, int depth)
+{
+	if (depth > 0) {
+		for (int i = 1; i < depth; i++) {
+			std::cout << " ";
+		}
+		std::cout << "-";
+	}
+	std::cout << n->token.value << std::endl;
+
+	for (auto i = n->children.begin(); i < n->children.end(); i++) {
+		printNode(*i, depth + 1);
+	}
+}
+
+void clok::printAST(node root)
+{
+	printNode(std::make_shared<node>(root), 0);
 }

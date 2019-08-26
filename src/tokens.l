@@ -2,19 +2,20 @@
 #include "tokens.h"
 %}
 %%
-use return USE;
-fn return FUNCTION;
-library return PUBLIC;
-return return RETURN;
-namespace return NAMESPACE;
+use/[[:^alnum:]_] return USE;
+fn/[[:^alnum:]_] return FUNCTION;
+library/[[:^alnum:]_] return PUBLIC;
+return/[[:^alnum:]_] return RETURN;
+namespace/[[:^alnum:]_] return NAMESPACE;
+run/[[:^alnum:]_] return RUN;
 
-(0x|0b|0o)?[0-9](i(8|16|32|64|128|256|512))? return INTEGER;
-(0x|0b|0o)?[0-9](\.[0-9])?(f(16|32|64|128))? return FLOAT;
+(0x|0b|0o)?[0-9]/[^f]? return INTEGER;
+(0x|0b|0o)?[0-9](\.[0-9])?f? return FLOAT;
 [A-Za-z]\w* return IDENTIFIER;
 
-"\"[^\"]\"" return STRING;
+\"[^\"]\" return STRING;
 
-"<\w*>" return TYPE;
+\<[[:alnum:]_]*\> return TYPE;
 
 "{" return OPEN_BRACE;
 "}" return CLOS_BRACE;
@@ -23,11 +24,11 @@ namespace return NAMESPACE;
 \[ return OPEN_SQUARE;
 \] return CLOS_SQUARE;
 
-"!" return OPERATOR_UN;
-"<=|>=|<<|>>|[+*/%<>=:.!~]" return OPERATOR_BIN;
+\+\+|--|\*\*|\/\/|[!~] return OPERATOR_UN;
+\<=|\>=|\<\<|\>\>|==|!=|&&|\|\||[+\-*/%<>=:.&\|\^] return OPERATOR_BIN;
 ; return SEMICOLON;
 
-"$" return END;
+<<EOF>> return END;
 \n yylineno++;
-\s {}//Ignore
+[ \t]* return WHITESPACE;
 . return UNKNOWN;

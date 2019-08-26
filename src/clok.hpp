@@ -22,4 +22,5 @@ namespace clok {
 	extern std::unordered_map<std::string, int> operators;
 
 	node parse();
+	void printAST(node root);
 }
