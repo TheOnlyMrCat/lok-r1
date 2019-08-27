@@ -86,7 +86,8 @@ node_t parseExpression()
 	node_t n = make(currentToken);
 	int rootPrec = 0;
 
-	while (nextToken() != SEMICOLON && currentToken.type != CLOS_PARENTHESIS && currentToken.type != CLOS_SQUARE) {
+	nextToken();
+	while (currentToken.type != SEMICOLON && currentToken.type != CLOS_PARENTHESIS && currentToken.type != CLOS_SQUARE) {
 		int checkingPrec;
 		try {
 			checkingPrec = binPrecedence.at(currentToken.value);
@@ -96,23 +97,74 @@ node_t parseExpression()
 		node_t child = n;
 		node_t parent = n;
 
-		while (rootPrec > checkingPrec) {
-			parent = child;
-			child = child->children[child->children.size() - 1];
-		}
+		if (rootPrec < checkingPrec) {
+			node_t newRoot = make(2, currentToken);
 
-		node_t opNode = make(2, currentToken);
+			newRoot->children.push_back(n);
 
-		opNode->children.push_back(child);
-		std::replace(parent->children.begin(), parent->children.end(), child, opNode);
+			if (nextToken() == OPEN_PARENTHESIS) {
+				nextToken();
+				newRoot->children.push_back(parseExpression());
+			} else {
+				node_t lastOp = newRoot;
+				while (currentToken.type == OPERATOR_PRE_UN || currentToken.value == "+" || currentToken.value == "-") {
+					node_t unaryOp = make(1, currentToken);
+					lastOp->children.push_back(unaryOp);
+					lastOp = unaryOp;
+					nextToken();
+				}
+				node_t item = make(0, currentToken);
 
-		if (nextToken() == OPEN_PARENTHESIS) {
-			nextToken();
-			opNode->children.push_back(parseExpression());
+				//We need to use a stack because postfixes associate left-to-right
+				std::vector<node_t> postfixStack;
+				while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE) {
+					postfixStack.push_back(make(1, currentToken));
+				}
+
+				for (auto rit = postfixStack.rbegin(); rit < postfixStack.rend(); rit++) {
+					lastOp->children.push_back(*rit);
+					lastOp = *rit;
+				}
+				lastOp->children.push_back(item);
+			}
+
+			n = newRoot;
 		} else {
-			opNode->children.push_back(make(0, currentToken));
+			while (rootPrec > checkingPrec) {
+				parent = child;
+				child = child->children[child->children.size() - 1];
+			}
+
+			node_t opNode = make(2, currentToken);
+
+			opNode->children.push_back(child);
+			std::replace(parent->children.begin(), parent->children.end(), child, opNode);
+
+			if (nextToken() == OPEN_PARENTHESIS) {
+				nextToken();
+				opNode->children.push_back(parseExpression());
+			} else {
+				while (currentToken.type == OPERATOR_PRE_UN || currentToken.value == "+" || currentToken.value == "-") {
+					node_t unaryOp = make(1, currentToken);
+					opNode->children.push_back(unaryOp);
+					opNode = unaryOp;
+					nextToken();
+				}
+				node_t item = make(0, currentToken);
+
+				//We need to use a stack because postfixes associate left-to-right
+				std::vector<node_t> postfixStack;
+				while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE) {
+					postfixStack.push_back(make(1, currentToken));
+				}
+
+				for (auto rit = postfixStack.rbegin(); rit < postfixStack.rend(); rit++) {
+					opNode->children.push_back(*rit);
+					opNode = *rit;
+				}
+				opNode->children.push_back(item);
+			}
 		}
-		n = opNode;
 	}
 
 	return n;

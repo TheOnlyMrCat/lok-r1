@@ -19,14 +19,17 @@ run/[[:^alnum:]_] return RUN;
 
 "{" return OPEN_BRACE;
 "}" return CLOS_BRACE;
-\( return OPEN_PARENTHESIS;
-\) return CLOS_PARENTHESIS;
-\[ return OPEN_SQUARE;
-\] return CLOS_SQUARE;
+"(" return OPEN_PARENTHESIS;
+")" return CLOS_PARENTHESIS;
+"[" return OPEN_SQUARE;
+"]" return CLOS_SQUARE;
 
-\+\+|--|\*\*|\/\/|[!~] return OPERATOR_UN;
+"++"|--|"**"|"//" return OPERATOR_POST_UN;
+[!~] return OPERATOR_PRE_UN;
 \<=|\>=|\<\<|\>\>|==|!=|&&|\|\||[+\-*/%<>=:.&\|\^] return OPERATOR_BIN;
 ; return SEMICOLON;
+
+(?-s:#.*)
 
 <<EOF>> return END;
 \n yylineno++;

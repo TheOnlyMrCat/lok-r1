@@ -6,7 +6,7 @@ fn sum <i32> [a <i32>; b <i32> = 0] {
 }
 
 fn noop {
-	// The thing doesn't even do anything!
+	# The thing doesn't even do anything!
 }
 
 run {
@@ -24,6 +24,6 @@ run {
 
 	noop [];
 
-	strBytes <byte:> = "Hello, world!";
-	strProper <string> = strBytes; // Implicit constructor call string(<byte:>)
+	<bit:> strBytes = "Hello, world!";
+	<string> strProper = strBytes; // Implicit constructor call string(<bit:>)
 }
