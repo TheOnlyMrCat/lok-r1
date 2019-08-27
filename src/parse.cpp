@@ -52,7 +52,7 @@ tokenType nextToken()
 node_t make(token type)
 {
 	node_t n = std::make_shared<node>();
-	n->token = type;
+	n->tk = type;
 	return n;
 }
 
@@ -254,7 +254,7 @@ void printNode(node_t n, int depth)
 		}
 		std::cout << "-";
 	}
-	std::cout << n->token.value << std::endl;
+	std::cout << n->tk.value << std::endl;
 
 	for (auto i = n->children.begin(); i < n->children.end(); i++) {
 		printNode(*i, depth + 1);

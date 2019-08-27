@@ -9,6 +9,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 #include "token.hpp"
 
@@ -18,5 +19,5 @@ typedef std::shared_ptr<node> node_t;
 
 struct node {
 	std::vector<node_t> children;
-	token token;
+	token tk;
 };
