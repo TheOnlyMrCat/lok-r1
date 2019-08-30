@@ -26,10 +26,11 @@ run/[[:^alnum:]_] return RUN;
 
 "++"|--|"**"|"//" return OPERATOR_POST_UN;
 [!~] return OPERATOR_PRE_UN;
-\<=|\>=|\<\<|\>\>|==|!=|&&|\|\||[+\-*/%<>=:.&\|\^] return OPERATOR_BIN;
+\<=|\>=|"<<"|">>"|==|!=|&&|"||"|[+\-*/%<>=:.&\|\^] return OPERATOR_BIN;
 ; return SEMICOLON;
 
-(?-s:#.*)
+(?-s:#.*) ;
+(?s:##.*##) ;
 
 <<EOF>> return END;
 \n yylineno++;

@@ -9,7 +9,6 @@
 #include "cxxopts.hpp"
 #include "clok.hpp"
 #include "yydef.hpp"
-#include "trees.hpp"
 
 #include <iostream>
 #include <cstdio>
@@ -25,13 +24,14 @@ namespace clok {
 
 extern FILE *yyin;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	auto optParser = cxxopts::Options("clok", "Compiler for the Lok programming language");
 
 	optParser.add_options()
+	("h,help", "Print this help message, then exit")
 	(  "version", "Print version information, then exit")
 	("v,verbose", "Enable verbose logging")
-	("h,help", "Print this help message, then exit")
 	(  "ast", "Generate Abstract Syntax Tree only")
 	;
 
@@ -49,10 +49,11 @@ int main(int argc, char *argv[]) {
 
 	clok::VERBOSE = options.count("verbose") > 0;
 
-	node programs[argc];
+	std::vector<node_t> programs;
+	programs.reserve(argc - 1);
 
 	for (int i = 1; i < argc; i++) {
-		if (clok::VERBOSE) std::cout << "Reading file: " << argv[i] << std::endl;
+		if (clok::VERBOSE) std::cout << "Parsing file: " << argv[i] << std::endl;
 		yyin = fopen(argv[i], "r");
 		if (yyin == NULL) {
 			std::cerr << "clok: Could not open file: " << argv[i] << std::endl;
@@ -60,18 +61,17 @@ int main(int argc, char *argv[]) {
 		}
 
 		try {
-			programs[i] = clok::parse();
+			programs.push_back(clok::parse());
 		} catch (ParseError e) {
 			std::cerr << "clok: Parsing error (" << argv[i] << ':' << yylineno << ")" << std::endl
 			          << "\t" << e.what() << std::endl;
 			fclose(yyin);
-			return EXIT_FAILURE;
 		}
 		fclose(yyin);
 	}
 
 	if (options.count("ast")) {
-		for (node n : programs) {
+		for (node_t n : programs) {
 			clok::printAST(n);
 		}
 	}

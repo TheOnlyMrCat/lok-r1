@@ -11,7 +11,8 @@
 #include <stdexcept>
 #include <unordered_map>
 
-class node;
+#include "trees.hpp"
+
 class ParseError : public std::logic_error {
 public:
 	ParseError(std::string what);
@@ -21,6 +22,6 @@ namespace clok {
 	extern bool VERBOSE;
 	extern std::unordered_map<std::string, int> operators;
 
-	node parse();
-	void printAST(node root);
+	node_t parse();
+	void printAST(node_t root);
 }

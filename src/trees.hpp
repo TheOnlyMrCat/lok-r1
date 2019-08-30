@@ -18,6 +18,11 @@ class node;
 typedef std::shared_ptr<node> node_t;
 
 struct node {
+	node(token tk): tk(tk) {}
+
+	bool operator==(node& other) {return children == other.children && tk == other.tk;}
+	bool operator!=(node& other) {return !operator==(other);}
+
 	std::vector<node_t> children;
 	token tk;
 };

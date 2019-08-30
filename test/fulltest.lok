@@ -1,5 +1,7 @@
-use <std::string>;
-use <std:random>;
+namespace <clok::test>
+
+use <std::string>
+use <std::random>
 
 fn sum <i32> [a <i32>; b <i32> = 0] {
 	return a + b;
@@ -25,5 +27,11 @@ run {
 	noop [];
 
 	<bit:> strBytes = "Hello, world!";
-	<string> strProper = strBytes; // Implicit constructor call string(<bit:>)
+	<string> strProper = strBytes; # Implicit constructor call string(<bit:>)
+}
+
+namespace <clok::test::sub>
+
+class <type> {
+	
 }
