@@ -11,6 +11,7 @@
 #include "yydef.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 
 extern "C"
@@ -32,7 +33,7 @@ int main(int argc, char *argv[])
 	("h,help", "Print this help message, then exit")
 	(  "version", "Print version information, then exit")
 	("v,verbose", "Enable verbose logging")
-	(  "ast", "Generate Abstract Syntax Tree only")
+	(  "ast", "Generate Abstract Syntax Tree only", cxxopts::value<std::string>()->implicit_value(""))
 	;
 
 	auto options = optParser.parse(argc, argv);
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
 		try {
 			programs.push_back(clok::parse());
 		} catch (ParseError e) {
-			std::cerr << "clok: Parsing error (" << argv[i] << ':' << yylineno << ")" << std::endl
+			std::cerr << "clok: Parsing error (" << argv[i] << ':' << yylineno << ":" << yycol << ")" << std::endl
 			          << "\t" << e.what() << std::endl;
 			fclose(yyin);
 		}
@@ -71,9 +72,16 @@ int main(int argc, char *argv[])
 	}
 
 	if (options.count("ast")) {
+		std::ostream *output = &std::cout;
+
+		std::string filename = options["ast"].as<std::string>();
+		if (filename != "") output = new std::fstream(filename);
+		
 		for (node_t n : programs) {
-			clok::printAST(n);
+			clok::printAST(n, output);
 		}
+
+		if (filename != "") delete output;
 	}
 
 	return EXIT_SUCCESS;

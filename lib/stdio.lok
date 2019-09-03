@@ -1,0 +1,5 @@
+namespace <std::io>;
+
+class ostream {
+    fn write [b: i8] public virtual;
+}

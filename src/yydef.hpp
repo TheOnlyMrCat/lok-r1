@@ -12,4 +12,6 @@ extern "C" {
     extern int yylex();
     extern char *yytext;
     extern int yylineno;
+
+    extern int yycol;
 }

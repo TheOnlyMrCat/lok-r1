@@ -2,20 +2,32 @@
 #include "tokens.h"
 %}
 %%
-use/[[:^alnum:]_] return USE;
-fn/[[:^alnum:]_] return FUNCTION;
-library/[[:^alnum:]_] return PUBLIC;
-return/[[:^alnum:]_] return RETURN;
-namespace/[[:^alnum:]_] return NAMESPACE;
-run/[[:^alnum:]_] return RUN;
+(?-s:#.*) ; // Line comment
+(?s:##.*##) ; // Block comment
 
-(0x|0b|0o)?[0-9]/[^f]? return INTEGER;
-(0x|0b|0o)?[0-9](\.[0-9])?f? return FLOAT;
-[A-Za-z]\w* return IDENTIFIER;
+use/[^[:alnum:]_]               return USE;
+fn/[^[:alnum:]_]                return FUNCTION;
+return/[^[:alnum:]_]            return RETURN;
+namespace/[^[:alnum:]_]         return NAMESPACE;
+run/[^[:alnum:]_]               return RUN;
+extends/[^[:alnum:]_]           return EXTENDS;
 
-\"[^\"]\" return STRING;
+class/[^[:alnum:]_]             return CLASS;
+struct/[^[:alnum:]_]            return STRUCT;
 
-\<[[:alnum:]_]*\> return TYPE;
+virtual/[^[:alnum:]_]           return FUNCTION_MOD;
+private/[^[:alnum:]_]           return ACCESS_MOD;
+protected/[^[:alnum:]_]         return ACCESS_MOD;
+internal/[^[:alnum:]_]          return ACCESS_MOD;
+public/[^[:alnum:]_]            return ACCESS_MOD;
+
+(0x|0b|0o)?[0-9]+/[^f]?         return INTEGER;
+(0x|0b|0o)?[0-9]+(\.[0-9])?f?   return FLOAT;
+[A-Za-z][A-Za-z0-9_]*           return IDENTIFIER;
+
+\"[^\"\n]*\"                    return STRING;
+
+[&$%]?:?\<([[:alnum:]_]|::)*\>  return TYPE;
 
 "{" return OPEN_BRACE;
 "}" return CLOS_BRACE;
@@ -29,10 +41,7 @@ run/[[:^alnum:]_] return RUN;
 \<=|\>=|"<<"|">>"|==|!=|&&|"||"|[+\-*/%<>=:.&\|\^] return OPERATOR_BIN;
 ; return SEMICOLON;
 
-(?-s:#.*) ;
-(?s:##.*##) ;
-
 <<EOF>> return END;
-\n yylineno++;
+\n return NEWLINE;
 [ \t]* return WHITESPACE;
 . return UNKNOWN;

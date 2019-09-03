@@ -1,9 +1,8 @@
 namespace <clok::test>
 
-use <std::string>
-use <std::random>
+use <std::io> # Works like "import std.io.*"
 
-fn sum <i32> [a <i32>; b <i32> = 0] {
+fn sum <i32> [a <i32>; b <i32> = 0;] {
 	return a + b;
 }
 
@@ -22,16 +21,16 @@ run {
 	one**;
 	two//;
 
-	result <i32> = sum [one, two];
+	result <i32> = sum [one; two;];
 
 	noop [];
 
-	<bit:> strBytes = "Hello, world!";
-	<string> strProper = strBytes; # Implicit constructor call string(<bit:>)
+	strBytes :<bit> = "Hello, world!";
+	strProper <string> = strBytes; # Implicit constructor call string(<bit:>)
 }
 
 namespace <clok::test::sub>
 
 class <type> {
-	
+	int <i32> protected = 2 * 6 << 3;
 }

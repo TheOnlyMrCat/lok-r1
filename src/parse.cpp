@@ -13,6 +13,8 @@
 
 #include "yydef.hpp"
 
+int yycol = 1;
+
 // A lower number means a higher precedence
 // A higher precedence means it is applied earlier
 std::unordered_map<std::string, int> binPrecedence = {
@@ -42,11 +44,12 @@ std::unordered_map<std::string, int> binPrecedence = {
 
 ParseError::ParseError(std::string what): std::logic_error(what) {}
 
-token currentToken = {NONE, "ERROR"};
+token currentToken = {NONE, ""};
 tokenType nextToken()
 {
+	yycol += currentToken.value.length();
 	tokenType ttp;
-	while ((ttp = static_cast<tokenType>(yylex())) == WHITESPACE);
+	while ((ttp = static_cast<tokenType>(yylex())) == WHITESPACE || ttp == NEWLINE) if (ttp == NEWLINE) {yylineno++; yycol = 1;}
 	currentToken = {ttp, yytext};
 	return ttp;
 }
@@ -63,10 +66,15 @@ node_t make(int i, token t)
 	return n;
 }
 
+ParseError unexpected(std::string expected)
+{
+	return ParseError(std::string("Unexpected token: '") + currentToken.value + "'. Expected " + expected);
+}
+
 node_t parseType()
 {
 	if (clok::VERBOSE) std::cout << "Parsing type" << std::endl;
-	if (currentToken.type != TYPE) throw ParseError(std::string("Unexpected token: '") + currentToken.value + "'. Expected type");
+	if (currentToken.type != TYPE) throw unexpected("type");
 
 	std::string type = currentToken.value;
 	token t = {TYPE, type.substr(1, type.length() - 2)};
@@ -108,8 +116,13 @@ node_t parseExpression()
 
 	//We need to use a stack because postfixes associate left-to-right
 	std::vector<node_t> postfixStack;
-	while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE) {
-		if (currentToken.type == TYPE) {
+	while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE || currentToken.type == OPEN_SQUARE) {
+		if (currentToken.type == OPEN_SQUARE) {
+			node_t params = make(currentToken);
+			while (nextToken() != CLOS_SQUARE) {
+				params->children.push_back(parseExpression());
+			}
+		} else if (currentToken.type == TYPE) {
 			postfixStack.push_back(parseType());
 		} else {
 			postfixStack.push_back(make(1, currentToken));
@@ -127,12 +140,12 @@ node_t parseExpression()
 	if (*lastOp != *item) lastOp->children.push_back(item);
 	int rootPrec = 0;
 
-	while (currentToken.type != SEMICOLON && currentToken.type != CLOS_PARENTHESIS && currentToken.type != CLOS_SQUARE) {
+	while (currentToken.type != SEMICOLON && currentToken.type != CLOS_PARENTHESIS) {
 		int checkingPrec;
 		try {
 			checkingPrec = binPrecedence.at(currentToken.value);
 		} catch (std::out_of_range e) {
-			throw ParseError(std::string("Unexpected token: '") + currentToken.value + "'. Expected operator");
+			throw unexpected("operator");
 		}
 		node_t child = n;
 		node_t parent = n;
@@ -160,8 +173,13 @@ node_t parseExpression()
 
 				//We need to use a stack because postfixes associate left-to-right
 				std::vector<node_t> postfixStack;
-				while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE) {
-					if (currentToken.type == TYPE) {
+				while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE || currentToken.type == OPEN_SQUARE) {
+					if (currentToken.type == OPEN_SQUARE) {
+						node_t params = make(currentToken);
+						while (nextToken() != CLOS_SQUARE) {
+							params->children.push_back(parseExpression());
+						}
+					} else if (currentToken.type == TYPE) {
 						postfixStack.push_back(parseType());
 					} else {
 						postfixStack.push_back(make(1, currentToken));
@@ -172,6 +190,7 @@ node_t parseExpression()
 					lastOp->children.push_back(*rit);
 					lastOp = *rit;
 				}
+
 				lastOp->children.push_back(item);
 			}
 
@@ -207,8 +226,13 @@ node_t parseExpression()
 
 				//We need to use a stack because postfixes associate left-to-right
 				std::vector<node_t> postfixStack;
-				while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE) {
-					if (currentToken.type == TYPE) {
+				while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE || currentToken.type == OPEN_SQUARE) {
+					if (currentToken.type == OPEN_SQUARE) {
+						node_t params = make(currentToken);
+						while (nextToken() != CLOS_SQUARE) {
+							params->children.push_back(parseExpression());
+						}
+					} else if (currentToken.type == TYPE) {
 						postfixStack.push_back(parseType());
 					} else {
 						postfixStack.push_back(make(1, currentToken));
@@ -216,8 +240,8 @@ node_t parseExpression()
 				}
 
 				for (auto rit = postfixStack.rbegin(); rit < postfixStack.rend(); rit++) {
-					opNode->children.push_back(*rit);
-					opNode = *rit;
+					lastOp->children.push_back(*rit);
+					lastOp = *rit;
 				}
 				opNode->children.push_back(item);
 			}
@@ -238,8 +262,14 @@ node_t parseBlock()
 
 	tokenType tk;
 	while ((tk = nextToken()) != CLOS_BRACE) {
-		//TODO: Keyword checks
-		n->children.push_back(parseExpression());
+		if (tk == RETURN) {
+			node_t rt = make(1, currentToken);
+			nextToken();
+			rt->children.push_back(parseExpression());
+			n->children.push_back(rt);
+		} else {
+			n->children.push_back(parseExpression());
+		}
 	}
 
 	return n;
@@ -260,7 +290,12 @@ node_t parseRun()
 node_t parseFunction()
 {
 	if (clok::VERBOSE) std::cout << "Parsing function" << std::endl;
-	node_t n = make(3, currentToken);
+	node_t n = make(4, currentToken);
+
+	if (nextToken() != IDENTIFIER) throw ParseError("Expected identifier after fn");
+
+	n->children.push_back(make(currentToken));
+
 	if (nextToken() == TYPE) {
 		n->children.push_back(parseType());
 		nextToken();
@@ -270,11 +305,71 @@ node_t parseFunction()
 		nextToken();
 		do {
 			n->children.push_back(parseExpression());
+			nextToken();
 		} while (currentToken.type != CLOS_SQUARE);
 		nextToken();
 	}
 
+	while (currentToken.type == FUNCTION_MOD || currentToken.type == ACCESS_MOD) {
+		n->children.push_back(make(0, currentToken));
+		nextToken();
+	}
+
+	n->children.push_back(parseBlock());
+
 	return n;
+}
+
+node_t parseDeclaration()
+{
+	node_t root = make(3, currentToken);
+
+	if (nextToken() != TYPE) throw unexpected("type");
+	root->children.push_back(make(currentToken));
+
+	while (nextToken() == ACCESS_MOD) root->children.push_back(make(currentToken));
+
+	if (currentToken.value != "=") throw unexpected("=");
+
+	nextToken();
+	root->children.push_back(parseExpression());
+
+	return root;
+}
+
+node_t parseClass()
+{
+	node_t root = make(3, currentToken);
+
+	nextToken();
+	root->children.push_back(parseType());
+
+	if (nextToken() == ACCESS_MOD) {
+		root->children.push_back(make(currentToken));
+		nextToken();
+	} else {
+		root->children.push_back(make(token(ACCESS_MOD, "public")));
+	}
+
+	if (currentToken.type == EXTENDS) {
+		root->children.push_back(make(currentToken));
+		root->children.push_back(parseType());
+
+		token superAccess = token(ACCESS_MOD, "public");
+		if (nextToken() == ACCESS_MOD) superAccess = currentToken;
+
+		root->children.push_back(make(superAccess));
+	}
+
+	if (currentToken.type != OPEN_BRACE) throw ParseError(std::string("Unexpected token: '") + currentToken.value + "'. Expected brace.");
+
+	while (nextToken() != CLOS_BRACE) {
+		if (currentToken.type == FUNCTION) root->children.push_back(parseFunction());
+		else if (currentToken.type == IDENTIFIER) root->children.push_back(parseDeclaration());
+		else throw ParseError(std::string("Unexpected token: ") + currentToken.value);
+	}
+
+	return root;
 }
 
 node_t parseRoot()
@@ -296,7 +391,10 @@ node_t parseRoot()
 		case RUN:
 			root->children.push_back(parseRun());
 			break;
-
+		case CLASS:
+		case STRUCT:
+			root->children.push_back(parseClass());
+			break;
 		case SEMICOLON:
 			break; // We don't care about trailing semicolons on things
 		case UNKNOWN:
@@ -314,22 +412,22 @@ node_t clok::parse()
 	return parseRoot();
 }
 
-void printNode(node_t n, int depth)
+void printNode(node_t n, int depth, std::ostream *stream)
 {
 	if (depth > 0) {
 		for (int i = 1; i < depth; i++) {
-			std::cout << " ";
+			*stream << " ";
 		}
-		std::cout << "-";
+		*stream << "-";
 	}
-	std::cout << n->tk.value << std::endl;
+	*stream << n->tk.value << std::endl;
 
 	for (auto i = n->children.begin(); i < n->children.end(); i++) {
-		printNode(*i, depth + 1);
+		printNode(*i, depth + 1, stream);
 	}
 }
 
-void clok::printAST(node_t root)
+void clok::printAST(node_t root, std::ostream *stream)
 {
-	printNode(root, 0);
+	printNode(root, 0, stream);
 }
