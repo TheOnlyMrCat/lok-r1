@@ -77,7 +77,14 @@ node_t parseType()
 	if (currentToken.type != TYPE) throw unexpected("type");
 
 	std::string type = currentToken.value;
-	token t = {TYPE, type.substr(1, type.length() - 2)};
+
+	token t = {NONE, ""};
+	int modifierEnd = type.find('<');
+	if (modifierEnd == 0) {
+		t = {TYPE, type.substr(1, type.length() - 2)};
+	} else {
+		t = {TYPE, type.substr(0, modifierEnd) + type.substr(modifierEnd + 1, type.length() - 2)};
+	}
 
 	return make(0, t);
 }
@@ -262,12 +269,14 @@ node_t parseBlock()
 
 	tokenType tk;
 	while ((tk = nextToken()) != CLOS_BRACE) {
-		if (tk == RETURN) {
+		switch (tk) {
+		case RETURN: {
 			node_t rt = make(1, currentToken);
 			nextToken();
 			rt->children.push_back(parseExpression());
 			n->children.push_back(rt);
-		} else {
+		}
+		default:
 			n->children.push_back(parseExpression());
 		}
 	}
@@ -324,8 +333,7 @@ node_t parseDeclaration()
 {
 	node_t root = make(3, currentToken);
 
-	if (nextToken() != TYPE) throw unexpected("type");
-	root->children.push_back(make(currentToken));
+	root->children.push_back(parseType());
 
 	while (nextToken() == ACCESS_MOD) root->children.push_back(make(currentToken));
 
