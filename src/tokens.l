@@ -12,6 +12,13 @@ namespace/[^[:alnum:]_]         return NAMESPACE;
 run/[^[:alnum:]_]               return RUN;
 extends/[^[:alnum:]_]           return EXTENDS;
 
+if/[^[:alnum:]_]                return IF;
+for/[^[:alnum:]_]               return FOR;
+while/[^[:alnum:]_]             return WHILE;
+
+break/[^[:alnum:]_]             return BREAK;
+continue/[^[:alnum:]_]          return CONTINUE;
+
 class/[^[:alnum:]_]             return CLASS;
 struct/[^[:alnum:]_]            return STRUCT;
 

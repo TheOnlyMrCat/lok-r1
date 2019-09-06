@@ -276,6 +276,56 @@ node_t parseBlock()
 			rt->children.push_back(parseExpression());
 			n->children.push_back(rt);
 		}
+		case IF: {
+			node_t fi = make(2, currentToken);
+
+			node_t expr;
+			if (nextToken() == OPEN_SQUARE) {
+				while (nextToken() != CLOS_SQUARE) {
+					expr = parseExpression();
+				}
+			} else {
+				expr = parseExpression();
+			}
+
+			if (expr == nullptr) throw ParseError("Expected expression after if");
+			fi->children.push_back(expr);
+
+			if (nextToken() == OPEN_BRACE) fi->children.push_back(parseBlock());
+			else fi->children.push_back(parseExpression());
+
+			n->children.push_back(fi);
+		}
+		case FOR: {
+			node_t rof = make(4, currentToken);
+
+			if (nextToken() == OPEN_SQUARE) nextToken();
+
+			rof->children.push_back(parseExpression());
+			rof->children.push_back(parseExpression());
+			rof->children.push_back(parseExpression());
+
+			if (nextToken() == CLOS_SQUARE) nextToken();
+
+			if (currentToken.type == OPEN_BRACE) rof->children.push_back(parseBlock());
+			else rof->children.push_back(parseExpression());
+
+			n->children.push_back(rof);
+		}
+		case WHILE: {
+			node_t elihw = make(2, currentToken);
+
+			if (nextToken() == OPEN_SQUARE) nextToken();
+
+			elihw->children.push_back(parseExpression());
+
+			if (nextToken() == CLOS_SQUARE) nextToken();
+
+			if (currentToken.type == OPEN_BRACE) elihw->children.push_back(parseBlock());
+			else elihw->children.push_back(parseExpression());
+		}
+		case OPEN_BRACE:
+			n->children.push_back(parseBlock());
 		default:
 			n->children.push_back(parseExpression());
 		}
