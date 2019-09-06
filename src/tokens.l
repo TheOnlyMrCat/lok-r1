@@ -14,6 +14,7 @@ extends/[^[:alnum:]_]           return EXTENDS;
 
 if/[^[:alnum:]_]                return IF;
 for/[^[:alnum:]_]               return FOR;
+rpt/[^[:alnum:]_]               return REPEAT;
 while/[^[:alnum:]_]             return WHILE;
 
 break/[^[:alnum:]_]             return BREAK;

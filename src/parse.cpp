@@ -312,6 +312,19 @@ node_t parseBlock()
 
 			n->children.push_back(rof);
 		}
+		case REPEAT: {
+			node_t rpt = make(2, currentToken);
+
+			if (nextToken() == OPEN_SQUARE) nextToken();
+
+			if (currentToken.type != INTEGER) throw unexpected("integer");
+			rpt->children.push_back(make(0, currentToken));
+
+			if (nextToken() == CLOS_SQUARE) nextToken();
+
+			if (currentToken.type == OPEN_BRACE) rpt->children.push_back(parseBlock());
+			else rpt->children.push_back(parseExpression());
+		}
 		case WHILE: {
 			node_t elihw = make(2, currentToken);
 

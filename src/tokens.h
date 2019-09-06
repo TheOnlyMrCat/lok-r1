@@ -38,6 +38,7 @@ enum tokenType {
 	STRUCT,
 	IF,
 	FOR,
+	REPEAT,
 	WHILE,
 	BREAK,
 	CONTINUE,
