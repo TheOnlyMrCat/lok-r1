@@ -258,6 +258,97 @@ node_t parseExpression()
 	return n;
 }
 
+node_t parseBlock();
+
+node_t parseBlockSegment()
+{
+	switch (currentToken.type) {
+	case RETURN: {
+		node_t rt = make(1, currentToken);
+		nextToken();
+		rt->children.push_back(parseExpression());
+
+		nextToken();
+
+		return rt;
+	}
+	case IF: {
+		node_t fi = make(2, currentToken);
+
+		node_t expr;
+		if (nextToken() == OPEN_SQUARE) {
+			while (nextToken() != CLOS_SQUARE) {
+				expr = parseExpression();
+			}
+		} else {
+			expr = parseExpression();
+		}
+
+		if (expr == nullptr) throw ParseError("Expected expression after if");
+		fi->children.push_back(expr);
+
+		if (nextToken() == OPEN_BRACE) fi->children.push_back(parseBlock());
+		else fi->children.push_back(parseExpression());
+
+		nextToken();
+
+		return fi;
+	}
+	case FOR: {
+		node_t rof = make(4, currentToken);
+
+		if (nextToken() == OPEN_SQUARE) nextToken();
+
+		rof->children.push_back(parseExpression());
+		rof->children.push_back(parseExpression());
+		rof->children.push_back(parseExpression());
+
+		if (nextToken() == CLOS_SQUARE) nextToken();
+
+		rof->children.push_back(parseBlockSegment());
+
+		return rof;
+	}
+	case REPEAT: {
+		node_t rpt = make(2, currentToken);
+
+		if (nextToken() == OPEN_SQUARE) nextToken();
+
+		if (currentToken.type != INTEGER) throw unexpected("integer");
+		rpt->children.push_back(make(0, currentToken));
+
+		if (nextToken() == CLOS_SQUARE) nextToken();
+
+		rpt->children.push_back(parseBlockSegment());
+
+		return rpt;
+	}
+	case WHILE: {
+		node_t elihw = make(2, currentToken);
+
+		if (nextToken() == OPEN_SQUARE) nextToken();
+
+		elihw->children.push_back(parseExpression());
+
+		if (nextToken() == CLOS_SQUARE) nextToken();
+
+		elihw->children.push_back(parseBlockSegment());
+
+		return elihw;
+	}
+	case OPEN_BRACE: {
+		node_t block = parseBlock();
+		nextToken();
+		return block;
+	}
+	default: {
+		node_t expr = parseExpression();
+		nextToken();
+		return expr;
+	}
+	}
+}
+
 node_t parseBlock()
 {
 	if (clok::VERBOSE) std::cout << "Parsing block statement" << std::endl;
@@ -267,81 +358,10 @@ node_t parseBlock()
 
 	node_t n = make({NONE, "block"});
 
-	tokenType tk;
-	while ((tk = nextToken()) != CLOS_BRACE) {
-		switch (tk) {
-		case RETURN: {
-			node_t rt = make(1, currentToken);
-			nextToken();
-			rt->children.push_back(parseExpression());
-			n->children.push_back(rt);
-		}
-		case IF: {
-			node_t fi = make(2, currentToken);
+	nextToken();
 
-			node_t expr;
-			if (nextToken() == OPEN_SQUARE) {
-				while (nextToken() != CLOS_SQUARE) {
-					expr = parseExpression();
-				}
-			} else {
-				expr = parseExpression();
-			}
-
-			if (expr == nullptr) throw ParseError("Expected expression after if");
-			fi->children.push_back(expr);
-
-			if (nextToken() == OPEN_BRACE) fi->children.push_back(parseBlock());
-			else fi->children.push_back(parseExpression());
-
-			n->children.push_back(fi);
-		}
-		case FOR: {
-			node_t rof = make(4, currentToken);
-
-			if (nextToken() == OPEN_SQUARE) nextToken();
-
-			rof->children.push_back(parseExpression());
-			rof->children.push_back(parseExpression());
-			rof->children.push_back(parseExpression());
-
-			if (nextToken() == CLOS_SQUARE) nextToken();
-
-			if (currentToken.type == OPEN_BRACE) rof->children.push_back(parseBlock());
-			else rof->children.push_back(parseExpression());
-
-			n->children.push_back(rof);
-		}
-		case REPEAT: {
-			node_t rpt = make(2, currentToken);
-
-			if (nextToken() == OPEN_SQUARE) nextToken();
-
-			if (currentToken.type != INTEGER) throw unexpected("integer");
-			rpt->children.push_back(make(0, currentToken));
-
-			if (nextToken() == CLOS_SQUARE) nextToken();
-
-			if (currentToken.type == OPEN_BRACE) rpt->children.push_back(parseBlock());
-			else rpt->children.push_back(parseExpression());
-		}
-		case WHILE: {
-			node_t elihw = make(2, currentToken);
-
-			if (nextToken() == OPEN_SQUARE) nextToken();
-
-			elihw->children.push_back(parseExpression());
-
-			if (nextToken() == CLOS_SQUARE) nextToken();
-
-			if (currentToken.type == OPEN_BRACE) elihw->children.push_back(parseBlock());
-			else elihw->children.push_back(parseExpression());
-		}
-		case OPEN_BRACE:
-			n->children.push_back(parseBlock());
-		default:
-			n->children.push_back(parseExpression());
-		}
+	while (currentToken.type != CLOS_BRACE) {
+		parseBlockSegment();
 	}
 
 	return n;
