@@ -37,6 +37,7 @@ enum tokenType {
 	CLASS,
 	STRUCT,
 	IF,
+	ELSE,
 	FOR,
 	REPEAT,
 	WHILE,

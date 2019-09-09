@@ -290,7 +290,11 @@ node_t parseBlockSegment()
 		if (nextToken() == OPEN_BRACE) fi->children.push_back(parseBlock());
 		else fi->children.push_back(parseExpression());
 
-		nextToken();
+		if (nextToken() == ELSE) {
+			node_t esle = make(1, currentToken);
+			esle->children.push_back(parseBlockSegment());
+			fi->children.push_back(esle);
+		}
 
 		return fi;
 	}
@@ -361,7 +365,7 @@ node_t parseBlock()
 	nextToken();
 
 	while (currentToken.type != CLOS_BRACE) {
-		parseBlockSegment();
+		n->children.push_back(parseBlockSegment());
 	}
 
 	return n;
@@ -414,8 +418,10 @@ node_t parseFunction()
 
 node_t parseDeclaration()
 {
+	if (clok::VERBOSE) std::cout << "Parsing declaration" << std::endl;
 	node_t root = make(3, currentToken);
 
+	nextToken();
 	root->children.push_back(parseType());
 
 	while (nextToken() == ACCESS_MOD) root->children.push_back(make(currentToken));
@@ -430,6 +436,7 @@ node_t parseDeclaration()
 
 node_t parseClass()
 {
+	if (clok::VERBOSE) std::cout << "Parsing class/struct" << std::endl;
 	node_t root = make(3, currentToken);
 
 	nextToken();
@@ -452,7 +459,7 @@ node_t parseClass()
 		root->children.push_back(make(superAccess));
 	}
 
-	if (currentToken.type != OPEN_BRACE) throw ParseError(std::string("Unexpected token: '") + currentToken.value + "'. Expected brace.");
+	if (currentToken.type != OPEN_BRACE) throw unexpected("brace");
 
 	while (nextToken() != CLOS_BRACE) {
 		if (currentToken.type == FUNCTION) root->children.push_back(parseFunction());

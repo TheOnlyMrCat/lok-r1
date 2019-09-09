@@ -13,6 +13,7 @@ run/[^[:alnum:]_]               return RUN;
 extends/[^[:alnum:]_]           return EXTENDS;
 
 if/[^[:alnum:]_]                return IF;
+else/[^[:alnum:]_]              return ELSE;
 for/[^[:alnum:]_]               return FOR;
 rpt/[^[:alnum:]_]               return REPEAT;
 while/[^[:alnum:]_]             return WHILE;
