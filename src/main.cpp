@@ -75,13 +75,14 @@ int main(int argc, char *argv[])
 		std::ostream *output = &std::cout;
 
 		std::string filename = options["ast"].as<std::string>();
-		if (filename != "") output = new std::fstream(filename);
-		
+		if (filename != "") output = new std::ofstream(filename);
+
 		for (node_t n : programs) {
 			clok::printAST(n, output);
 		}
 
 		if (filename != "") delete output;
+		return EXIT_SUCCESS;
 	}
 
 	return EXIT_SUCCESS;

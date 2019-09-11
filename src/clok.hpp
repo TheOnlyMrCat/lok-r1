@@ -21,7 +21,6 @@ public:
 
 namespace clok {
 	extern bool VERBOSE;
-	extern std::unordered_map<std::string, int> operators;
 
 	node_t parse();
 	void printAST(node_t root, std::ostream *stream);

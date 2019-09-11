@@ -49,7 +49,7 @@ tokenType nextToken()
 {
 	yycol += currentToken.value.length();
 	tokenType ttp;
-	while ((ttp = static_cast<tokenType>(yylex())) == WHITESPACE || ttp == NEWLINE) if (ttp == NEWLINE) {yylineno++; yycol = 1;}
+	while ((ttp = static_cast<tokenType>(yylex())) == WHITESPACE || ttp == NEWLINE) if (ttp == NEWLINE) {yylineno++; yycol = 1;} else yycol += strlen(yytext);
 	currentToken = {ttp, yytext};
 	return ttp;
 }
@@ -265,9 +265,9 @@ node_t parseBlockSegment()
 	switch (currentToken.type) {
 	case RETURN: {
 		node_t rt = make(1, currentToken);
-		nextToken();
-		rt->children.push_back(parseExpression());
-
+		if (nextToken() != SEMICOLON) {
+			rt->children.push_back(parseExpression());
+		}
 		nextToken();
 
 		return rt;
@@ -292,6 +292,7 @@ node_t parseBlockSegment()
 
 		if (nextToken() == ELSE) {
 			node_t esle = make(1, currentToken);
+			nextToken();
 			esle->children.push_back(parseBlockSegment());
 			fi->children.push_back(esle);
 		}
@@ -303,8 +304,8 @@ node_t parseBlockSegment()
 
 		if (nextToken() == OPEN_SQUARE) nextToken();
 
-		rof->children.push_back(parseExpression());
-		rof->children.push_back(parseExpression());
+		rof->children.push_back(parseExpression()); nextToken();
+		rof->children.push_back(parseExpression()); nextToken();
 		rof->children.push_back(parseExpression());
 
 		if (nextToken() == CLOS_SQUARE) nextToken();
@@ -318,8 +319,7 @@ node_t parseBlockSegment()
 
 		if (nextToken() == OPEN_SQUARE) nextToken();
 
-		if (currentToken.type != INTEGER) throw unexpected("integer");
-		rpt->children.push_back(make(0, currentToken));
+		rpt->children.push_back(parseExpression());
 
 		if (nextToken() == CLOS_SQUARE) nextToken();
 

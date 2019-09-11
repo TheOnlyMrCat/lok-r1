@@ -26,11 +26,32 @@ run {
 	noop [];
 
 	strBytes :<bit> = "Hello, world!";
-	strProper <string> = strBytes; # Implicit constructor call string(<bit:>)
+	strProper <string> = strBytes; # Implicit constructor call string(:<bit>)
+
+	if one == 100; result = 5;
+	else if two > 9; one = 100;
+	else return;
+
+	if [3 == 5;] {
+		sum [4;];
+		# This line won't be reached so it's fine
+	} else two++;
+
+	for i <i8> = 20; i < 127; i++; stdout.write [i;];
+
+	rpt [one = 5;] stdout.write ["Hello, World!";];
+
+	while 1; {
+		one++;
+	}
 }
 
 namespace <clok::test::sub>
 
 class <type> {
 	int <i32> protected = 2 * 6 << 3;
+
+	fn internalFn [f <i32>;] {
+		return sum [int; f;];
+	}
 }

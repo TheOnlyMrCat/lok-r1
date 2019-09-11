@@ -48,7 +48,7 @@ public/[^[:alnum:]_]            return ACCESS_MOD;
 "++"|--|"**"|"//" return OPERATOR_POST_UN;
 [!~] return OPERATOR_PRE_UN;
 \<=|\>=|"<<"|">>"|==|!=|&&|"||"|[+\-*/%<>=:.&\|\^] return OPERATOR_BIN;
-; return SEMICOLON;
+;|\u037e return SEMICOLON;
 
 <<EOF>> return END;
 \n return NEWLINE;
