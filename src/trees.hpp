@@ -13,16 +13,20 @@
 
 #include "token.hpp"
 
-class node;
+struct node;
 
 typedef std::shared_ptr<node> node_t;
 
 struct node {
-	node(token tk): tk(tk) {}
+	explicit node(token t): tk(t) {}
 
 	bool operator==(node& other) {return children == other.children && tk == other.tk;}
 	bool operator!=(node& other) {return !operator==(other);}
 
-	std::vector<node_t> children;
+	std::vector<std::shared_ptr<node>> children;
 	token tk;
+};
+
+class action_node {
+	virtual ~action_node();
 };

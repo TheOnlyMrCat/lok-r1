@@ -18,7 +18,7 @@ int yycol = 1;
 
 // A lower number means a higher precedence
 // A higher precedence means it is applied earlier
-std::unordered_map<std::string, int> binPrecedence = {
+static std::unordered_map<std::string, int> binPrecedence = {
 	{"(", 0},
 	{":", 1},
 	{".", 1},
@@ -43,9 +43,9 @@ std::unordered_map<std::string, int> binPrecedence = {
 	{"=", 9}
 };
 
-ParseError::ParseError(std::string what): std::logic_error(what) {}
+ParseError::ParseError(const std::string what): std::logic_error(what) {}
 
-token currentToken = {NONE, ""};
+static token currentToken = {NONE, ""};
 tokenType nextToken()
 {
 	yycol += currentToken.value.length();
@@ -79,15 +79,12 @@ node_t parseType()
 
 	std::string type = currentToken.value;
 
-	token t = {NONE, ""};
 	int modifierEnd = type.find('<');
 	if (modifierEnd == 0) {
-		t = {TYPE, type.substr(1, type.length() - 2)};
+		return make(0, {TYPE, type.substr(1, type.length() - 2)});
 	} else {
-		t = {TYPE, type.substr(0, modifierEnd) + type.substr(modifierEnd + 1, type.length() - 2)};
+		return make(0, {TYPE, type.substr(0, modifierEnd) + type.substr(modifierEnd + 1, type.length() - 2)});
 	}
-
-	return make(0, t);
 }
 
 node_t parseNamespace()
@@ -108,51 +105,62 @@ node_t parseUse()
 	return n;
 }
 
+node_t parseLoad()
+{
+	if (clok::VERBOSE) std::cout << "Parsing load" << std::endl;
+	node_t load = make(1, currentToken);
+	if (nextToken() != STRING) throw unexpected("string");
+	load->children.push_back(make(0, currentToken));
+	return load;
+}
+
 node_t parseExpression()
 {
 	if (clok::VERBOSE) std::cout << "Parsing expression" << std::endl;
 
 	node_t n = make(currentToken);
-	node_t lastOp = n;
-	while (currentToken.type == OPERATOR_PRE_UN || currentToken.value == "+" || currentToken.value == "-") {
-		node_t unaryOp = make(1, currentToken);
-		lastOp->children.push_back(unaryOp);
-		lastOp = unaryOp;
-		nextToken();
-	}
-	node_t item = make(0, currentToken);
+	{
+		node_t lastOp = n;
+		while (currentToken.type == OPERATOR_PRE_UN || currentToken.value == "+" || currentToken.value == "-") {
+			node_t unaryOp = make(1, currentToken);
+			lastOp->children.push_back(unaryOp);
+			lastOp = unaryOp;
+			nextToken();
+		}
+		node_t item = make(0, currentToken);
 
-	//We need to use a stack because postfixes associate left-to-right
-	std::vector<node_t> postfixStack;
-	while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE || currentToken.type == OPEN_SQUARE) {
-		if (currentToken.type == OPEN_SQUARE) {
-			node_t params = make(currentToken);
-			while (nextToken() != CLOS_SQUARE) {
-				params->children.push_back(parseExpression());
+		//We need to use a stack because postfixes associate left-to-right
+		std::vector<node_t> postfixStack;
+		while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE || currentToken.type == OPEN_SQUARE) {
+			if (currentToken.type == OPEN_SQUARE) {
+				node_t params = make(currentToken);
+				while (nextToken() != CLOS_SQUARE) {
+					params->children.push_back(parseExpression());
+				}
+			} else if (currentToken.type == TYPE) {
+				postfixStack.push_back(parseType());
+			} else {
+				postfixStack.push_back(make(1, currentToken));
 			}
-		} else if (currentToken.type == TYPE) {
-			postfixStack.push_back(parseType());
-		} else {
-			postfixStack.push_back(make(1, currentToken));
 		}
-	}
 
-	for (auto rit = postfixStack.rbegin(); rit < postfixStack.rend(); rit++) {
-		if (*n == *item) {
-			n = *rit;
-		} else {
-			lastOp->children.push_back(*rit);
+		for (auto rit = postfixStack.rbegin(); rit < postfixStack.rend(); rit++) {
+			if (*n == *item) {
+				n = *rit;
+			} else {
+				lastOp->children.push_back(*rit);
+			}
+			lastOp = *rit;
 		}
-		lastOp = *rit;
+		if (*lastOp != *item) lastOp->children.push_back(item);
 	}
-	if (*lastOp != *item) lastOp->children.push_back(item);
 	int rootPrec = 0;
 
 	while (currentToken.type != SEMICOLON && currentToken.type != CLOS_PARENTHESIS) {
 		int checkingPrec;
 		try {
 			checkingPrec = binPrecedence.at(currentToken.value);
-		} catch (std::out_of_range e) {
+		} catch (std::out_of_range) {
 			throw unexpected("operator");
 		}
 		node_t child = n;
@@ -248,8 +256,8 @@ node_t parseExpression()
 				}
 
 				for (auto rit = postfixStack.rbegin(); rit < postfixStack.rend(); rit++) {
-					lastOp->children.push_back(*rit);
-					lastOp = *rit;
+					opNode->children.push_back(*rit);
+					opNode = *rit;
 				}
 				opNode->children.push_back(item);
 			}
@@ -481,6 +489,8 @@ node_t parseRoot()
 		case USE:
 			root->children.push_back(parseUse());
 			break;
+		case LOAD:
+			root->children.push_back(parseLoad());
 		case NAMESPACE:
 			root->children.push_back(parseNamespace());
 			break;

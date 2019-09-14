@@ -7,8 +7,7 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/parse.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile])
-
-m4_include(ax_cxx_compile_stdcxx.m4)
+AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -38,5 +37,8 @@ AC_TYPE_UINT8_T
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([memset])
+
+AX_BOOST_BASE([1.70])
+AX_BOOST_FILESYSTEM
 
 AC_OUTPUT

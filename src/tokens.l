@@ -6,6 +6,7 @@
 (?s:##.*##) ; // Block comment
 
 use/[^[:alnum:]_]               return USE;
+load/[^[:alnum:]_]              return LOAD;
 fn/[^[:alnum:]_]                return FUNCTION;
 return/[^[:alnum:]_]            return RETURN;
 namespace/[^[:alnum:]_]         return NAMESPACE;

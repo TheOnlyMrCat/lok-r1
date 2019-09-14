@@ -16,7 +16,7 @@
 
 class ParseError : public std::logic_error {
 public:
-	ParseError(std::string what);
+	explicit ParseError(std::string what);
 };
 
 namespace clok {
@@ -24,4 +24,6 @@ namespace clok {
 
 	node_t parse();
 	void printAST(node_t root, std::ostream *stream);
+
+	
 }
