@@ -14,6 +14,10 @@
 #include <fstream>
 #include <cstdio>
 
+#include <boost/filesystem.hpp>
+
+namespace bfs = boost::filesystem;
+
 extern "C"
 int yywrap() {
 	return 1; //TODO?
@@ -54,17 +58,21 @@ int main(int argc, char *argv[])
 	programs.reserve(argc - 1);
 
 	for (int i = 1; i < argc; i++) {
-		if (clok::VERBOSE) std::cout << "Parsing file: " << argv[i] << std::endl;
+		bfs::path file = bfs::absolute(argv[i]);
+		bfs::path relative = bfs::relative(file);
+
+		if (clok::VERBOSE) std::cout << "Parsing file: " << relative << std::endl;
+
 		yyin = fopen(argv[i], "r");
 		if (yyin == NULL) {
-			std::cerr << "clok: Could not open file: " << argv[i] << std::endl;
+			std::cerr << "clok: Could not open file: " << relative << std::endl;
 			return EXIT_FAILURE;
 		}
 
 		try {
 			programs.push_back(clok::parse());
 		} catch (ParseError e) {
-			std::cerr << "clok: Parsing error (" << argv[i] << ':' << yylineno << ":" << yycol << ")" << std::endl
+			std::cerr << "clok: Parsing error (" << relative << ':' << yylineno << ":" << yycol << ")" << std::endl
 			          << "\t" << e.what() << std::endl;
 			fclose(yyin);
 		}

@@ -15,8 +15,6 @@ AX_CXX_COMPILE_STDCXX(11)
 AC_PROG_CC
 AC_PROG_LEX
 
-# Checks for libraries.
-
 # Checks for header files.
 AC_CHECK_HEADERS([inttypes.h stdlib.h string.h unistd.h])
 
@@ -38,7 +36,9 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([memset])
 
-AX_BOOST_BASE([1.70])
+# Checks for boost
+AX_BOOST_BASE([1.46],, [AC_MSG_ERROR([Clok requires Boost, but it was not found in your system])])
+AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 
 AC_OUTPUT
