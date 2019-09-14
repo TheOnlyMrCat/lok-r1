@@ -12,7 +12,8 @@ addons:
   apt:
     packages:
     - autoconf
-    - libboost-all-dev
+    - libboost-system-dev
+    - libboost-filesystem-dev
     install:
     - flex
 
