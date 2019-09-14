@@ -37,7 +37,7 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([memset])
 
 # Checks for boost
-AX_BOOST_BASE([1.46],, [AC_MSG_ERROR([Clok requires Boost, but it was not found in your system])])
+AX_BOOST_BASE([1.60],, [AC_MSG_ERROR([Clok requires Boost version >1.60, but it was not found in your system])])
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 
