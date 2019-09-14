@@ -12,7 +12,7 @@ addons:
   apt:
     packages:
     - autoconf
-    - boost
+    - libboost-all-dev
     install:
     - flex
 
