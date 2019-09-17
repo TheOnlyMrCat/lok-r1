@@ -3,7 +3,6 @@
 %}
 %%
 (?-s:#.*) ; // Line comment
-(?s:##.*##) ; // Block comment
 
 use/[^[:alnum:]_]               return USE;
 load/[^[:alnum:]_]              return LOAD;
@@ -25,7 +24,8 @@ continue/[^[:alnum:]_]          return CONTINUE;
 class/[^[:alnum:]_]             return CLASS;
 struct/[^[:alnum:]_]            return STRUCT;
 
-virtual/[^[:alnum:]_]           return FUNCTION_MOD;
+abstract/[^[:alnum:]_]          return FUNCTION_MOD;
+loc?ked/[^[:alnum:]_]           return FUNCTION_MOD;
 private/[^[:alnum:]_]           return ACCESS_MOD;
 protected/[^[:alnum:]_]         return ACCESS_MOD;
 internal/[^[:alnum:]_]          return ACCESS_MOD;

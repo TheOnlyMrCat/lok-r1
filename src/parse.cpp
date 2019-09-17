@@ -134,8 +134,12 @@ node_t parseExpression()
 		while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE || currentToken.type == OPEN_SQUARE) {
 			if (currentToken.type == OPEN_SQUARE) {
 				node_t params = make(currentToken);
-				while (nextToken() != CLOS_SQUARE) {
+				if (nextToken() != CLOS_SQUARE) {
 					params->children.push_back(parseExpression());
+					while (currentToken.type != CLOS_SQUARE) {
+						nextToken();
+						params->children.push_back(parseExpression());
+					}
 				}
 			} else if (currentToken.type == TYPE) {
 				postfixStack.push_back(parseType());
@@ -156,7 +160,7 @@ node_t parseExpression()
 	}
 	int rootPrec = 0;
 
-	while (currentToken.type != SEMICOLON && currentToken.type != CLOS_PARENTHESIS) {
+	while (currentToken.type != SEMICOLON && currentToken.type != CLOS_PARENTHESIS && currentToken.type != CLOS_SQUARE) {
 		int checkingPrec;
 		try {
 			checkingPrec = binPrecedence.at(currentToken.value);
@@ -192,8 +196,12 @@ node_t parseExpression()
 				while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE || currentToken.type == OPEN_SQUARE) {
 					if (currentToken.type == OPEN_SQUARE) {
 						node_t params = make(currentToken);
-						while (nextToken() != CLOS_SQUARE) {
+						if (nextToken() != CLOS_SQUARE) {
 							params->children.push_back(parseExpression());
+							while (currentToken.type != CLOS_SQUARE) {
+								nextToken();
+								params->children.push_back(parseExpression());
+							}
 						}
 					} else if (currentToken.type == TYPE) {
 						postfixStack.push_back(parseType());
@@ -245,8 +253,12 @@ node_t parseExpression()
 				while (nextToken() == OPERATOR_POST_UN || currentToken.type == TYPE || currentToken.type == OPEN_SQUARE) {
 					if (currentToken.type == OPEN_SQUARE) {
 						node_t params = make(currentToken);
-						while (nextToken() != CLOS_SQUARE) {
+						if (nextToken() != CLOS_SQUARE) {
 							params->children.push_back(parseExpression());
+							while (currentToken.type != CLOS_SQUARE) {
+								nextToken();
+								params->children.push_back(parseExpression());
+							}
 						}
 					} else if (currentToken.type == TYPE) {
 						postfixStack.push_back(parseType());
@@ -286,7 +298,8 @@ node_t parseBlockSegment()
 
 		node_t expr;
 		if (nextToken() == OPEN_SQUARE) {
-			while (nextToken() != CLOS_SQUARE) {
+			while (currentToken.type != CLOS_SQUARE) {
+				nextToken();
 				expr = parseExpression();
 			}
 		} else {
@@ -315,9 +328,7 @@ node_t parseBlockSegment()
 
 		rof->children.push_back(parseExpression()); nextToken();
 		rof->children.push_back(parseExpression()); nextToken();
-		rof->children.push_back(parseExpression());
-
-		if (nextToken() == CLOS_SQUARE) nextToken();
+		rof->children.push_back(parseExpression()); nextToken();
 
 		rof->children.push_back(parseBlockSegment());
 
@@ -329,8 +340,7 @@ node_t parseBlockSegment()
 		if (nextToken() == OPEN_SQUARE) nextToken();
 
 		rpt->children.push_back(parseExpression());
-
-		if (nextToken() == CLOS_SQUARE) nextToken();
+		nextToken();
 
 		rpt->children.push_back(parseBlockSegment());
 
@@ -342,8 +352,7 @@ node_t parseBlockSegment()
 		if (nextToken() == OPEN_SQUARE) nextToken();
 
 		elihw->children.push_back(parseExpression());
-
-		if (nextToken() == CLOS_SQUARE) nextToken();
+		nextToken();
 
 		elihw->children.push_back(parseBlockSegment());
 
@@ -407,10 +416,9 @@ node_t parseFunction()
 	}
 
 	if (currentToken.type == OPEN_SQUARE) {
-		nextToken();
 		do {
-			n->children.push_back(parseExpression());
 			nextToken();
+			n->children.push_back(parseExpression());
 		} while (currentToken.type != CLOS_SQUARE);
 		nextToken();
 	}
@@ -491,6 +499,7 @@ node_t parseRoot()
 			break;
 		case LOAD:
 			root->children.push_back(parseLoad());
+			break;
 		case NAMESPACE:
 			root->children.push_back(parseNamespace());
 			break;
