@@ -54,9 +54,25 @@ run {
 namespace <clok::test::sub>
 
 class <type> {
-	int <i32> protected = 2 * 6 << 3;
+	int <i32> protected;
 
 	fn internalFn [f <i32>] {
 		return sum [int; f];
+	}
+
+	new [int <i32> = 2 * 6 << 3] : int [int] {
+		this.int = internalFn [int];
+	}
+}
+
+class <sub> : <type> {
+	myInt <i32> private;
+
+	fn internalFn [f <i32>] {
+		return sum [f; sum [int; myInt]];
+	}
+
+	new [int <i32> = 2 * 6 << 3; myInt <i32>] : <type> [int]; myInt [myInt] {
+		this.myInt = internalFn [myInt];
 	}
 }

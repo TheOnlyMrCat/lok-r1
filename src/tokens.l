@@ -10,7 +10,6 @@ fn/[^[:alnum:]_]                return FUNCTION;
 return/[^[:alnum:]_]            return RETURN;
 namespace/[^[:alnum:]_]         return NAMESPACE;
 run/[^[:alnum:]_]               return RUN;
-extends/[^[:alnum:]_]           return EXTENDS;
 
 if/[^[:alnum:]_]                return IF;
 else/[^[:alnum:]_]              return ELSE;
@@ -23,6 +22,7 @@ continue/[^[:alnum:]_]          return CONTINUE;
 
 class/[^[:alnum:]_]             return CLASS;
 struct/[^[:alnum:]_]            return STRUCT;
+new/[^[:alnum:]_]               return NEW;
 
 abstract/[^[:alnum:]_]          return FUNCTION_MOD;
 loc?ked/[^[:alnum:]_]           return FUNCTION_MOD;

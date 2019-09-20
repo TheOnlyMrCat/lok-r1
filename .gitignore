@@ -25,3 +25,6 @@ src/tokens.c
 *.o
 clok
 lok-compiler-0.1-alpha.tar.gz
+
+# Ignore files used for debugging
+ast.out

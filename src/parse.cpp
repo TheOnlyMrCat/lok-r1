@@ -141,6 +141,7 @@ node_t parseExpression()
 						params->children.push_back(parseExpression());
 					}
 				}
+				postfixStack.push_back(params);
 			} else if (currentToken.type == TYPE) {
 				postfixStack.push_back(parseType());
 			} else {
@@ -203,6 +204,7 @@ node_t parseExpression()
 								params->children.push_back(parseExpression());
 							}
 						}
+						postfixStack.push_back(params);
 					} else if (currentToken.type == TYPE) {
 						postfixStack.push_back(parseType());
 					} else {
@@ -260,6 +262,7 @@ node_t parseExpression()
 								params->children.push_back(parseExpression());
 							}
 						}
+						postfixStack.push_back(params);
 					} else if (currentToken.type == TYPE) {
 						postfixStack.push_back(parseType());
 					} else {
@@ -416,12 +419,16 @@ node_t parseFunction()
 	}
 
 	if (currentToken.type == OPEN_SQUARE) {
-		do {
-			nextToken();
+		if (nextToken() != CLOS_SQUARE) {
 			n->children.push_back(parseExpression());
-		} while (currentToken.type != CLOS_SQUARE);
-		nextToken();
+			while (currentToken.type != CLOS_SQUARE) {
+				nextToken();
+				n->children.push_back(parseExpression());
+			}
+			nextToken();
+		}
 	}
+
 
 	while (currentToken.type == FUNCTION_MOD || currentToken.type == ACCESS_MOD) {
 		n->children.push_back(make(0, currentToken));
@@ -443,10 +450,46 @@ node_t parseDeclaration()
 
 	while (nextToken() == ACCESS_MOD) root->children.push_back(make(currentToken));
 
-	if (currentToken.value != "=") throw unexpected("=");
+	if (currentToken.value == "=") root->children.push_back(parseExpression());
 
-	nextToken();
-	root->children.push_back(parseExpression());
+	return root;
+}
+
+node_t parseCtor()
+{
+	if (clok::VERBOSE) std::cout << "Parsing constructor" << std::endl;
+	node_t root = make(2, currentToken);
+
+	if (nextToken() == OPEN_SQUARE && nextToken() != CLOS_SQUARE) {
+		root->children.push_back(parseExpression());
+		while (currentToken.type != CLOS_SQUARE) {
+			nextToken();
+			root->children.push_back(parseExpression());
+		}
+		nextToken();
+	}
+
+	if (currentToken.value == ":") {
+		node_t listRoot = make(currentToken);
+		nextToken();
+		while (currentToken.type != OPEN_BRACE) {
+			if (currentToken.type == IDENTIFIER) {
+				node_t id = make(1, currentToken);
+				if (nextToken() == OPEN_SQUARE) nextToken();
+				id->children.push_back(parseExpression());
+				listRoot->children.push_back(id);
+			} else if (currentToken.type == TYPE) {
+				node_t super = make(1, currentToken);
+				if (nextToken() == OPEN_SQUARE) nextToken();
+				super->children.push_back(parseExpression());
+				listRoot->children.push_back(super);
+			} else throw unexpected("initializable");
+			if (nextToken(), currentToken.value == ";") nextToken();
+		}
+	}
+
+	root->children.push_back(parseBlock());
+
 
 	return root;
 }
@@ -466,8 +509,9 @@ node_t parseClass()
 		root->children.push_back(make(token(ACCESS_MOD, "public")));
 	}
 
-	if (currentToken.type == EXTENDS) {
+	while (currentToken.value == ":") {
 		root->children.push_back(make(currentToken));
+		nextToken();
 		root->children.push_back(parseType());
 
 		token superAccess = token(ACCESS_MOD, "public");
@@ -481,6 +525,7 @@ node_t parseClass()
 	while (nextToken() != CLOS_BRACE) {
 		if (currentToken.type == FUNCTION) root->children.push_back(parseFunction());
 		else if (currentToken.type == IDENTIFIER) root->children.push_back(parseDeclaration());
+		else if (currentToken.type == NEW) root->children.push_back(parseCtor());
 		else throw ParseError(std::string("Unexpected token: ") + currentToken.value);
 	}
 
