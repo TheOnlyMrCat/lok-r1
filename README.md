@@ -1,7 +1,7 @@
 # clok - Lok compiler
 
 [![Build Status](https://travis-ci.org/TheOnlyMrCat/clok.svg?branch=master)](https://travis-ci.org/TheOnlyMrCat/clok)
-[![codecov](https://codecov.io/gh/TheOnlyMrCat/clok/branch/master/graph/badge.svg)](https://codecov.io/gh/TheOnlyMrCat/clok)
+![Github build status](https://github.com/TheOnlyMrCat/clok/workflows/CI/badge.svg)
 [![License](https://img.shields.io/github/license/TheOnlyMrCat/clok?color=yellow)](https://github.com/TheOnlyMrCat/clok/blob/master/LICENSE)
 
 This is a compiler for the Lok programming language.

@@ -1,0 +1,16 @@
+name: CI
+
+on: [push, pull-request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: configure
+        run: ./autogen.sh
+      - run: ./configure
+      - name: make
+        run: make
+      - name: check
+        run: make check
+      - run: make distcheck
