@@ -83,7 +83,7 @@ node_t parseType()
 	if (modifierEnd == 0) {
 		return make(0, {TYPE, type.substr(1, type.length() - 2)});
 	} else {
-		return make(0, {TYPE, type.substr(0, modifierEnd) + type.substr(modifierEnd + 1, type.length() - 2)});
+		return make(0, {TYPE, type.substr(0, modifierEnd) + type.substr(modifierEnd + 1, type.length() - modifierEnd - 2)});
 	}
 }
 
@@ -510,14 +510,16 @@ node_t parseClass()
 	}
 
 	while (currentToken.value == ":") {
-		root->children.push_back(make(currentToken));
+		node_t extends = make(2, currentToken);
+
 		nextToken();
-		root->children.push_back(parseType());
+		node_t type = parseType();
 
-		token superAccess = token(ACCESS_MOD, "public");
-		if (nextToken() == ACCESS_MOD) superAccess = currentToken;
+		if (nextToken() == ACCESS_MOD) type->children.push_back(make(currentToken));
+		else type->children.push_back(make({ACCESS_MOD, "public"}));
 
-		root->children.push_back(make(superAccess));
+		extends->children.push_back(type);
+		root->children.push_back(extends);
 	}
 
 	if (currentToken.type != OPEN_BRACE) throw unexpected("brace");
@@ -557,6 +559,9 @@ node_t parseRoot()
 		case CLASS:
 		case STRUCT:
 			root->children.push_back(parseClass());
+			break;
+		case IDENTIFIER:
+			root->children.push_back(parseDeclaration());
 			break;
 		case SEMICOLON:
 			break; // We don't care about trailing semicolons on things
