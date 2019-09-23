@@ -2,7 +2,7 @@
 //  trees.hpp
 //  Lok
 //
-//  Created by Maxwell Guppy on 6/7/19.
+//  Created by TheOnlyMrCat on 6/7/19.
 //  Copyright © 2019 Dockdev. All rights reserved.
 //
 

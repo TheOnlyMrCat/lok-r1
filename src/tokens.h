@@ -2,7 +2,7 @@
 //  tokens.h
 //  Lok
 //
-//  Created by Maxwell Guppy on 5/7/19.
+//  Created by TheOnlyMrCat on 5/7/19.
 //  Copyright © 2019 Dockdev. All rights reserved.
 //
 

@@ -2,7 +2,7 @@
 //  yydef.hpp
 //  Lok
 //
-//  Created by Maxwell Guppy on 14/8/19.
+//  Created by TheOnlyMrCat on 14/8/19.
 //  Copyright © 2019 Dockdev. All rights reserved.
 //
 

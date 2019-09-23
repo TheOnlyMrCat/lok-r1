@@ -2,7 +2,7 @@
 //  main.cpp
 //  Lok
 //
-//  Created by Maxwell Guppy on 5/7/19.
+//  Created by TheOnlyMrCat on 5/7/19.
 //  Copyright © 2019 Dockdev. All rights reserved.
 //
 
@@ -37,7 +37,8 @@ int main(int argc, char *argv[])
 	("h,help", "Print this help message, then exit")
 	(  "version", "Print version information, then exit")
 	("v,verbose", "Enable verbose logging")
-	(  "ast", "Generate Abstract Syntax Tree only", cxxopts::value<std::string>()->implicit_value(""))
+	(  "ast", "Generate Abstract Syntax Tree only")
+	("o,output", "File name to output to", cxxopts::value<std::string>())
 	;
 
 	auto options = optParser.parse(argc, argv);
@@ -80,16 +81,19 @@ int main(int argc, char *argv[])
 	}
 
 	if (options.count("ast")) {
-		std::ostream *output = &std::cout;
+		std::ostream *output;
 
-		std::string filename = options["ast"].as<std::string>();
-		if (filename != "") output = new std::ofstream(filename);
+		if (options.count("output")) {
+			output = new std::ofstream(options["output"].as<std::string>());
+		} else {
+			output = new std::ofstream("ast.out");
+		}
 
 		for (node_t n : programs) {
 			clok::printAST(n, output);
 		}
 
-		if (filename != "") delete output;
+		delete output;
 		return EXIT_SUCCESS;
 	}
 

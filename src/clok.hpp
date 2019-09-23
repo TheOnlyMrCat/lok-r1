@@ -2,7 +2,7 @@
 //  loki.hpp
 //  Lok
 //
-//  Created by Maxwell Guppy on 13/8/19.
+//  Created by TheOnlyMrCat on 13/8/19.
 //  Copyright © 2019 Dockdev. All rights reserved.
 //
 
@@ -25,5 +25,5 @@ namespace clok {
 	node_t parse();
 	void printAST(node_t root, std::ostream *stream);
 
-	
+
 }

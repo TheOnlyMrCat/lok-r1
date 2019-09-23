@@ -2,7 +2,7 @@
 //  parse.cpp
 //  Lok
 //
-//  Created by Maxwell Guppy on 13/8/19.
+//  Created by TheOnlyMrCat on 13/8/19.
 //  Copyright © 2019 Dockdev. All rights reserved.
 //
 
