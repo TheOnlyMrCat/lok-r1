@@ -4,6 +4,7 @@ load "stdio"
 
 use <std::io> # Works like "import std.io.*"
 
+@inline
 fn sum <i32> [a &<i32>; b <i32> = 0] {
 	return a + b;
 }
@@ -20,8 +21,6 @@ run {
 
 	two++;
 	one--;
-	one**;
-	two//;
 
 	result <i32> = sum [one; two];
 
@@ -74,5 +73,21 @@ class <sub> : <type> {
 
 	new [int <i32> = 2 * 6 << 3; myInt <i32>] : <type> [int]; myInt [myInt] {
 		this.myInt = internalFn [myInt];
+	}
+}
+
+namespace <>
+
+# @extern [C]
+# fn external;
+
+@iterable [begin = first; end = last]
+class <iterable> {
+	fn first <i32> {
+		return 0;
+	}
+
+	fn last <i32> {
+		return 10;
 	}
 }

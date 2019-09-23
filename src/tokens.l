@@ -39,17 +39,19 @@ public/[^[:alnum:]_]            return ACCESS_MOD;
 
 [&$%]?:?\<([[:alnum:]_]|::)*\>  return TYPE;
 
-"{" return OPEN_BRACE;
-"}" return CLOS_BRACE;
-"(" return OPEN_PARENTHESIS;
-")" return CLOS_PARENTHESIS;
-"[" return OPEN_SQUARE;
-"]" return CLOS_SQUARE;
+@[A-Za-z][[:alnum:]_]*         return ANNOTATION;
 
-"++"|--|"**"|"//" return OPERATOR_POST_UN;
-[!~] return OPERATOR_PRE_UN;
+"{"                             return OPEN_BRACE;
+"}"                             return CLOS_BRACE;
+"("                             return OPEN_PARENTHESIS;
+")"                             return CLOS_PARENTHESIS;
+"["                             return OPEN_SQUARE;
+"]"                             return CLOS_SQUARE;
+
+"++"|--                         return OPERATOR_POST_UN;
+[!~]                            return OPERATOR_PRE_UN;
 \<=|\>=|"<<"|">>"|==|!=|&&|"||"|[+\-*/%<>=:.&\|\^] return OPERATOR_BIN;
-;|\u037e return SEMICOLON;
+;|\u037e                        return SEMICOLON;
 
 <<EOF>> return END;
 \n return NEWLINE;

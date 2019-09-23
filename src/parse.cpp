@@ -282,6 +282,20 @@ node_t parseExpression()
 	return n;
 }
 
+node_t parseAnnotation()
+{
+	node_t annot = make({currentToken.type, currentToken.value.substr(1, currentToken.value.length() - 1)});
+	if (nextToken() == OPEN_SQUARE) {
+		while (currentToken.type != CLOS_SQUARE) {
+			nextToken();
+			annot->children.push_back(parseExpression());
+		}
+		nextToken();
+	}
+
+	return annot;
+}
+
 node_t parseBlock();
 
 node_t parseBlockSegment()
@@ -538,9 +552,9 @@ node_t parseRoot()
 {
 	node_t root = make({NONE, "root"});
 
-	tokenType tk;
-	while ((tk = nextToken()) != END) {
-		switch (tk) {
+	while (nextToken() != END) {
+		skip:
+		switch (currentToken.type) {
 		case USE:
 			root->children.push_back(parseUse());
 			break;
@@ -563,6 +577,10 @@ node_t parseRoot()
 		case IDENTIFIER:
 			root->children.push_back(parseDeclaration());
 			break;
+		case ANNOTATION:
+			root->children.push_back(parseAnnotation());
+			if (currentToken.type != END) goto skip;
+			else goto exit;
 		case SEMICOLON:
 			break; // We don't care about trailing semicolons on things
 		case UNKNOWN:
@@ -572,6 +590,7 @@ node_t parseRoot()
 		}
 	}
 
+	exit:
 	return root;
 }
 
