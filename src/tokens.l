@@ -39,7 +39,7 @@ public/[^[:alnum:]_]            return ACCESS_MOD;
 
 [&$%]?:?\<([[:alnum:]_]|::)*\>  return TYPE;
 
-@[A-Za-z][[:alnum:]_]*         return ANNOTATION;
+@[A-Za-z][[:alnum:]_]*          return ANNOTATION;
 
 "{"                             return OPEN_BRACE;
 "}"                             return CLOS_BRACE;

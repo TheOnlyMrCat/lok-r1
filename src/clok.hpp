@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
-#include "trees.hpp"
+#include "astnode.hpp"
 
 class ParseError : public std::logic_error {
 public:

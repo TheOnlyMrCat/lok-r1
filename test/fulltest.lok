@@ -2,7 +2,7 @@ namespace <clok::test>
 
 load "stdio"
 
-use <std::io> # Works like "import std.io.*"
+use <std::io> # Works like "using namespace std::io"
 
 @inline
 fn sum <i32> [a &<i32>; b <i32> = 0] {

@@ -1,5 +1,5 @@
 //
-//  trees.hpp
+//  astnode.hpp
 //  Lok
 //
 //  Created by TheOnlyMrCat on 6/7/19.
@@ -25,8 +25,4 @@ struct node {
 
 	std::vector<std::shared_ptr<node>> children;
 	token tk;
-};
-
-class action_node {
-	virtual ~action_node();
 };
