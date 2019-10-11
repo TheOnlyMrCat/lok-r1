@@ -9,15 +9,15 @@
 #include <algorithm>
 #include <cstring>
 #include <iostream>
+#include <unordered_map>
 
 #include "clok.hpp"
-
+#include "astnode.hpp"
 #include "yydef.hpp"
 
 int yycol = 1;
 
-// A lower number means a higher precedence
-// A higher precedence means it is applied earlier
+// A lower number means it is applied earlier
 static std::unordered_map<std::string, int> binPrecedence = {
 	{"(", 0},
 	{":", 1},
@@ -607,7 +607,7 @@ void printNode(node_t n, int depth, std::ostream *stream)
 		}
 		*stream << "-";
 	}
-	*stream << n->tk.value << std::endl;
+	*stream << "{" << n->tk.type << ", " << n->tk.value << "}" << std::endl;
 
 	for (auto i = n->children.begin(); i < n->children.end(); i++) {
 		printNode(*i, depth + 1, stream);

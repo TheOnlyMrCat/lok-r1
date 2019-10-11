@@ -34,11 +34,12 @@ int main(int argc, char *argv[])
 	auto optParser = cxxopts::Options("clok", "Compiler for the Lok programming language");
 
 	optParser.add_options()
-	("h,help", "Print this help message, then exit")
+	(  "help", "Print this help message, then exit")
 	(  "version", "Print version information, then exit")
 	("v,verbose", "Enable verbose logging")
 	(  "ast", "Generate Abstract Syntax Tree only")
 	("o,output", "File name to output to", cxxopts::value<std::string>())
+	("h,header", "Generate a header for each input file")
 	;
 
 	auto options = optParser.parse(argc, argv);
@@ -82,19 +83,34 @@ int main(int argc, char *argv[])
 
 	if (options.count("ast")) {
 		std::ostream *output;
+		bool outputByName = false;
 
 		if (options.count("output")) {
 			output = new std::ofstream(options["output"].as<std::string>());
 		} else {
-			output = new std::ofstream("ast.out");
+			outputByName = true;
 		}
 
-		for (node_t n : programs) {
-			clok::printAST(n, output);
+		for (int i = 0; i < programs.size(); i++) {
+			if (outputByName) {
+				delete output;
+				output = new std::ofstream(bfs::absolute(argv[i + 1]).filename().string() + ".ast");
+			}
+			clok::printAST(programs[i], output);
 		}
 
 		delete output;
 		return EXIT_SUCCESS;
+	}
+
+	if (options.count("header")) {
+		std::ostream *output;
+
+		if (options.count("output")) {
+			output = new std::ofstream(options["output"].as<std::string>());
+		} else {
+			output = new std::ofstream("");
+		}
 	}
 
 	return EXIT_SUCCESS;

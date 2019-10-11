@@ -10,9 +10,9 @@
 
 #include <ostream>
 #include <stdexcept>
-#include <unordered_map>
 
-#include "astnode.hpp"
+typedef class std::shared_ptr<class node> node_t;
+typedef class std::unique_ptr<struct header_node> header_node_t;
 
 class ParseError : public std::logic_error {
 public:
@@ -25,5 +25,5 @@ namespace clok {
 	node_t parse();
 	void printAST(node_t root, std::ostream *stream);
 
-
+	header_node_t header_gen(node_t program);
 }
