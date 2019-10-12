@@ -6,6 +6,7 @@
 //  Copyright © 2019 Dockdev. All rights reserved.
 //
 
+#include "asmnodes.hpp"
 #include "cxxopts.hpp"
 #include "clok.hpp"
 #include "yydef.hpp"
@@ -105,12 +106,23 @@ int main(int argc, char *argv[])
 
 	if (options.count("header")) {
 		std::ostream *output;
+		bool outputByName = false;
 
 		if (options.count("output")) {
 			output = new std::ofstream(options["output"].as<std::string>());
 		} else {
-			output = new std::ofstream("");
+			outputByName = true;
 		}
+
+		for (int i = 0; i < programs.size(); i++) {
+			if (outputByName) {
+				delete output;
+				output = new std::ofstream(bfs::absolute(argv[i + 1]).filename().string() + ".h");
+			}
+			*output << clok::header_gen(programs[i])->c_gen();
+		}
+
+		return EXIT_SUCCESS;
 	}
 
 	return EXIT_SUCCESS;

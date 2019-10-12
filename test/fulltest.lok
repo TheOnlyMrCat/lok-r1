@@ -52,7 +52,7 @@ run {
 
 namespace <clok::test::sub>
 
-class <type> {
+class <type> public {
 	int <i32> protected;
 
 	fn internalFn [f <i32>] {
